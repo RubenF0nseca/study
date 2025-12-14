@@ -1,10 +1,7 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Task } from './entities/task.entity';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
@@ -17,11 +14,11 @@ export class TasksService {
     },
   ];
 
-  findAll() {
+  findAll(): Task[] {
     return this.tasks;
   }
 
-  findOneTask(id: string) {
+  findOneTask(id: string): Task {
     const task = this.tasks.find((task) => task.id === Number(id));
     if (task) return task;
 
@@ -29,19 +26,20 @@ export class TasksService {
     //throw new NotFoundException('Not found');
   }
 
-  create(body: any) {
+  create(createTaskDto: CreateTaskDto): Task {
     const newId = this.tasks.length + 1;
 
-    const newTask = {
+    const newTask: Task = {
       id: newId,
-      ...body,
+      ...createTaskDto,
+      completed: false,
     };
 
     this.tasks.push(newTask);
     return newTask;
   }
 
-  update(id: string, body: any) {
+  update(id: string, updateTaskDto: UpdateTaskDto): Task {
     const taskIndex = this.tasks.findIndex((task) => task.id === Number(id));
 
     if (taskIndex < 0) {
@@ -50,15 +48,17 @@ export class TasksService {
 
     const taskItem = this.tasks[taskIndex];
 
-    this.tasks[taskIndex] = {
+    const updatedTask: Task = {
       ...taskItem,
-      ...body,
+      ...updateTaskDto,
     };
 
-    return this.tasks[taskIndex];
+    this.tasks[taskIndex] = updatedTask;
+
+    return updatedTask;
   }
 
-  delete(id: string) {
+  delete(id: string): { message: string } {
     const taskIndex = this.tasks.findIndex((task) => task.id === Number(id));
 
     if (taskIndex < 0) {
