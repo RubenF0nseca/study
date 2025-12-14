@@ -30,12 +30,9 @@ export class TasksController {
     return this.taskService.create(body);
   }
 
-  @Patch(':id') // put was ===
+  @Patch(':id') // put is ===
   updateTask(@Param('id') id: string, @Body() body: any) {
-    console.log('id: ', id);
-    console.log('body: ', body);
-
-    return 'patch task';
+    return this.taskService.update(id, body);
   }
 
   @Delete(':id')

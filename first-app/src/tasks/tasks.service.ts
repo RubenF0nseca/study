@@ -1,16 +1,51 @@
 import { Injectable } from '@nestjs/common';
+import { Task } from './entities/task.entity';
 
 @Injectable()
 export class TasksService {
+  private tasks: Task[] = [
+    {
+      id: 1,
+      name: 'task 1 name',
+      description: 'task 1 description',
+      completed: false,
+    },
+  ];
+
   findAll() {
-    return [{ id: 1, task: 'Comprar Pão' }];
+    return this.tasks;
   }
 
   findOneTask(id: string) {
-    return 'Tarefa Ruben Teste...' + id;
+    return this.tasks.find((task) => task.id === Number(id));
   }
+
   create(body: any) {
-    console.log('success');
-    return body;
+    const newId = this.tasks.length + 1;
+
+    const newTask = {
+      id: newId,
+      ...body,
+    };
+
+    this.tasks.push(newTask);
+    return newTask;
+  }
+
+  update(id: string, body: any) {
+    const taskIndex = this.tasks.findIndex((task) => task.id === Number(id));
+
+    if (taskIndex >= 0) {
+      const taskItem = this.tasks[taskIndex];
+
+      this.tasks[taskIndex] = {
+        ...taskItem,
+        ...body,
+      };
+
+      return 'updated';
+    }
+
+    return 'ID not found';
   }
 }
