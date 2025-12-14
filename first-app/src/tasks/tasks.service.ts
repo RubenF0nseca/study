@@ -6,7 +6,11 @@ export class TasksService {
     return [{ id: 1, task: 'Comprar Pão' }];
   }
 
-  findOneTask() {
-    return 'Tarefa Matheus Teste...';
+  findOneTask(id: string) {
+    return 'Tarefa Ruben Teste...' + id;
+  }
+  create(body: any) {
+    console.log('success');
+    return body;
   }
 }
