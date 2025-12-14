@@ -18,8 +18,8 @@ export class TasksService {
     return this.tasks;
   }
 
-  findOneTask(id: string): Task {
-    const task = this.tasks.find((task) => task.id === Number(id));
+  findOneTask(id: number): Task {
+    const task = this.tasks.find((task) => task.id === id);
     if (task) return task;
 
     throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
@@ -39,8 +39,8 @@ export class TasksService {
     return newTask;
   }
 
-  update(id: string, updateTaskDto: UpdateTaskDto): Task {
-    const taskIndex = this.tasks.findIndex((task) => task.id === Number(id));
+  update(id: number, updateTaskDto: UpdateTaskDto): Task {
+    const taskIndex = this.tasks.findIndex((task) => task.id === id);
 
     if (taskIndex < 0) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
@@ -58,8 +58,8 @@ export class TasksService {
     return updatedTask;
   }
 
-  delete(id: string): { message: string } {
-    const taskIndex = this.tasks.findIndex((task) => task.id === Number(id));
+  delete(id: number): { message: string } {
+    const taskIndex = this.tasks.findIndex((task) => task.id === id);
 
     if (taskIndex < 0) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
