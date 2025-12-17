@@ -1,72 +1,59 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Task } from './entities/task.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { PaginatorDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class TasksService {
-  private tasks: Task[] = [
-    {
-      id: 1,
-      name: 'task 1 name',
-      description: 'task 1 description',
-      completed: false,
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  findAll(): Task[] {
-    return this.tasks;
+  async findAll(paginatorDto: PaginatorDto = {}) {
+    const { limit = 10, offset = 0 } = paginatorDto;
+
+    return await this.prisma.task.findMany({
+      take: limit,
+      skip: offset,
+    });
   }
 
-  findOneTask(id: number): Task {
-    const task = this.tasks.find((task) => task.id === id);
-    if (task) return task;
+  async findOneTask(id: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id },
+    });
 
-    throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
-    //throw new NotFoundException('Not found');
-  }
-
-  create(createTaskDto: CreateTaskDto): Task {
-    const newId = this.tasks.length + 1;
-
-    const newTask: Task = {
-      id: newId,
-      ...createTaskDto,
-      completed: false,
-    };
-
-    this.tasks.push(newTask);
-    return newTask;
-  }
-
-  update(id: number, updateTaskDto: UpdateTaskDto): Task {
-    const taskIndex = this.tasks.findIndex((task) => task.id === id);
-
-    if (taskIndex < 0) {
-      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
-    const taskItem = this.tasks[taskIndex];
-
-    const updatedTask: Task = {
-      ...taskItem,
-      ...updateTaskDto,
-    };
-
-    this.tasks[taskIndex] = updatedTask;
-
-    return updatedTask;
+    return task;
   }
 
-  delete(id: number): { message: string } {
-    const taskIndex = this.tasks.findIndex((task) => task.id === id);
+  async create(createTaskDto: CreateTaskDto) {
+    return this.prisma.task.create({
+      data: {
+        ...createTaskDto,
+        completed: false,
+      },
+    });
+  }
 
-    if (taskIndex < 0) {
-      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
-    }
+  async update(id: number, updateTaskDto: UpdateTaskDto) {
+    await this.findOneTask(id);
 
-    this.tasks.splice(taskIndex, 1);
+    return this.prisma.task.update({
+      where: { id },
+      data: updateTaskDto,
+    });
+  }
 
-    return { message: 'task deleted' };
+  async delete(id: number) {
+    await this.findOneTask(id);
+
+    await this.prisma.task.delete({
+      where: { id },
+    });
+
+    return { message: 'Task deleted successfully' };
   }
 }
